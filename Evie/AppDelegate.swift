@@ -30,11 +30,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             .ignoresCycle
         ]
         
+        
         let state = EvieState()
-        let monitor = NSEvent.addGlobalMonitorForEvents(
+        let mouseMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: [.mouseMoved,.leftMouseDragged]) {event in
                 state.position = NSEvent.mouseLocation
             }
+            
+        
+        let modiferMonitor = NSEvent
+            .addGlobalMonitorForEvents(
+                matching: .flagsChanged) {event in
+                    if event.modifierFlags.contains([.option,.control]) {
+                        state.isListening = true
+                    }
+                    else if state.isListening == true {
+                        state.isListening = false
+                    }
+            }
+        
+        
+        
         
         let contentview = NSHostingView(
             rootView: EvieView(state: state, size: screenFrame.size)
@@ -43,10 +59,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         panel.contentView = contentview
         
         panel.orderFrontRegardless()
-        
-        
-        
-        
         
     }
     

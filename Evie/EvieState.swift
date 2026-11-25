@@ -11,4 +11,5 @@ import SwiftUI
 @Observable
 class EvieState {
     var position: CGPoint = .zero
+    var isListening: Bool = false
 }
