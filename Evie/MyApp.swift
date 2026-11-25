@@ -1,6 +1,7 @@
 import SwiftUI
 
 @main struct MyApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var meaning:String = "Even vunurable I'm Ecstatic"
     var body: some Scene {
         MenuBarExtra("Evie", systemImage: "cursorarrow.rays"){
