@@ -10,6 +10,7 @@ import AppKit
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var panel: NSPanel?
+    let hotKeyMonitor: HotKeyMonitor = HotKeyMonitor()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         let screenFrame = NSScreen.main?.frame ?? NSRect(x:0,y:0,width: 1440, height: 900)
@@ -30,27 +31,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             .ignoresCycle
         ]
         
-        
         let state = EvieState()
         let mouseMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: [.mouseMoved,.leftMouseDragged]) {event in
                 state.position = NSEvent.mouseLocation
             }
             
-        
-        let modiferMonitor = NSEvent
-            .addGlobalMonitorForEvents(
-                matching: .flagsChanged) {event in
-                    if event.modifierFlags.contains([.option,.control]) {
-                        state.isListening = true
-                    }
-                    else if state.isListening == true {
-                        state.isListening = false
-                    }
-            }
-        
-        
-        
+        hotKeyMonitor.start()
+        hotKeyMonitor.onPress = {
+            state.isListening = true
+        }
+        hotKeyMonitor.onRelease = {
+            state.isListening = false
+        }
         
         let contentview = NSHostingView(
             rootView: EvieView(state: state, size: screenFrame.size)
@@ -60,6 +53,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         panel.orderFrontRegardless()
         
+    }
+    
+    func applicationWillTerminate(_ notification: Notification) {
+        hotKeyMonitor.stop()
     }
     
 }
