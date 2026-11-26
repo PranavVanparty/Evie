@@ -12,4 +12,5 @@ import SwiftUI
 class EvieState {
     var position: CGPoint = .zero
     var isListening: Bool = false
+    var capture: CGImage? 
 }
