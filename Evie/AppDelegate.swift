@@ -9,44 +9,69 @@ import SwiftUI
 import AppKit
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    var panel: NSPanel?
+    var eviePanel: NSPanel?
     let hotKeyMonitor: HotKeyMonitor = HotKeyMonitor()
     let clock = ContinuousClock()
     let state = EvieState()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        if !CGPreflightScreenCaptureAccess() {
-            CGRequestScreenCaptureAccess()
-            print("asked for access")
-            // ToDo: Add something that takes them to settings to change this
-        }
-        Task {
-            do {
-                _ = try await ScreenCapture.capture(id: 0)
-            } catch {
-                print("Failed to warm up capture \(error)")
-            }
-        }
-        
+        permissionChecks()
+        warmUp()
         
         let screenFrame = NSScreen.main?.frame ?? NSRect(x:0,y:0,width: 1440, height: 900)
-        let panel = NSPanel(
+        let eviePanel = NSPanel(
             contentRect: screenFrame,
             styleMask: [.borderless,.nonactivatingPanel],
             backing: .buffered,
             defer: true
         )
-        self.panel = panel
-        panel.backgroundColor = .clear //NSColor.red.withAlphaComponent(0.3)
-        panel.isFloatingPanel = true
-        panel.ignoresMouseEvents = true
-        panel.collectionBehavior = [
+        self.eviePanel = eviePanel
+        eviePanel.backgroundColor = .clear //NSColor.red.withAlphaComponent(0.3)
+        eviePanel.isFloatingPanel = true
+        eviePanel.ignoresMouseEvents = true
+        eviePanel.collectionBehavior = [
             .canJoinAllSpaces,
             .auxiliary,
             .stationary,
             .ignoresCycle
         ]
         
+        setUpMonitors()
+        
+        let contentview = NSHostingView(
+            rootView: EvieView(state: state, size: screenFrame.size)
+        )
+        contentview.sizingOptions = []
+        eviePanel.contentView = contentview
+        
+        eviePanel.orderFrontRegardless()
+        
+    }
+    
+    func applicationWillTerminate(_ notification: Notification) {
+        hotKeyMonitor.stop()
+    }
+    
+    func permissionChecks() {
+        if !CGPreflightScreenCaptureAccess() {
+            CGRequestScreenCaptureAccess()
+            print("asked for access")
+            // ToDo: Add something that takes them to settings to change this
+        }
+    }
+    
+    func warmUp() {
+        // Captrue Warm up
+        Task {
+            do {
+                _ = try await ScreenCapture.capture(includedWindowIds: [])
+            } catch {
+                print("Failed to warm up capture \(error)")
+            }
+        }
+    }
+    
+    func setUpMonitors() {
         let mouseMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: [.mouseMoved,.leftMouseDragged]) {event in
                 self.state.position = NSEvent.mouseLocation
@@ -61,7 +86,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self.state.isListening = false
             Task { @MainActor in
                 do {
-                    let img = try await ScreenCapture.capture(id: panel.windowNumber)
+                    let ids:[Int] = []
+                    let img = try await ScreenCapture.capture(includedWindowIds: ids)
                     self.state.capture = img
                     print("width \(img.width), height \(img.height)")
                     print(self.clock.now - start)
@@ -70,19 +96,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
-        
-        let contentview = NSHostingView(
-            rootView: EvieView(state: state, size: screenFrame.size)
-        )
-        contentview.sizingOptions = []
-        panel.contentView = contentview
-        
-        panel.orderFrontRegardless()
-        
-    }
-    
-    func applicationWillTerminate(_ notification: Notification) {
-        hotKeyMonitor.stop()
     }
     
 }

@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Xcode User Settings & State
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Build & Generated Artifacts
+build/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.moved-aside
+*.xccheckout
+
+# Swift Package Manager (SPM)
+.build/
+.swiftpm/
+# Uncomment below if you do NOT want to track package versions (usually recommended to keep tracked for apps)
+# Package.resolved
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Secrets & Local Configs (Optional - uncomment if used)
+# *.xcconfig
+# .env

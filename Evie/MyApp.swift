@@ -5,7 +5,7 @@ import SwiftUI
     var meaning:String = "Even vunurable I'm Ecstatic"
     var body: some Scene {
         
-        MenuBarExtra("Evie", systemImage: "cursorarrow.rays"){
+        MenuBarExtra("Evie", systemImage: "pointer.arrow.ipad.square.fill"){
             MenuPanelView(state: appDelegate.state)
                 .frame(width: 400, height: 360, alignment: .top)
         }.menuBarExtraStyle(.window)

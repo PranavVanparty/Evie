@@ -9,7 +9,7 @@ import Foundation
 import ScreenCaptureKit
 
 enum ScreenCapture {
-    static func capture(id: Int) async throws -> CGImage {
+    static func capture(includedWindowIds: [Int]) async throws -> CGImage {
         let content = try await SCShareableContent
             .excludingDesktopWindows(false, onScreenWindowsOnly: true)
         
@@ -17,22 +17,18 @@ enum ScreenCapture {
             throw NSError(domain: "ScreenshotError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No display found"])
         }
         
-//        let excludeApps = content.applications.filter { app in
-//            Bundle.main.bundleIdentifier == app.bundleIdentifier
-//        }
-        
-        let excludedWindows = content.windows.filter { scWindow in
-            scWindow.windowID == id
+        let excludeApps = content.applications.filter { app in
+            Bundle.main.bundleIdentifier == app.bundleIdentifier
         }
         
-//        let filter = SCContentFilter(
-//            display: display,
-//            excludingApplications: excludeApps,
-//            exceptingWindows: []
-//        )
+        let windows = content.windows.filter { scWindow in
+            includedWindowIds.contains(Int(scWindow.windowID))
+        }
+        
         let filter = SCContentFilter(
             display: display,
-            excludingWindows: excludedWindows
+            excludingApplications: excludeApps,
+            exceptingWindows: windows
         )
         
         let scale = CGFloat(filter.pointPixelScale)
