@@ -22,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         Task {
             do {
-                _ = try await ScreenCapture.capture()
+                _ = try await ScreenCapture.capture(id: 0)
             } catch {
                 print("Failed to warm up capture \(error)")
             }
@@ -61,7 +61,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self.state.isListening = false
             Task { @MainActor in
                 do {
-                    let img = try await ScreenCapture.capture()
+                    let img = try await ScreenCapture.capture(id: panel.windowNumber)
                     self.state.capture = img
                     print("width \(img.width), height \(img.height)")
                     print(self.clock.now - start)
